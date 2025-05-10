@@ -95,11 +95,13 @@ struct Framebuffer::Main
 
 	Capture::Connection _capture { _env };
 
+	Blit::Rotate rotate { Blit::Rotate::R90};
+
 	Capture::Connection::Screen _captured_screen { _capture, _env.rm(), {
-	                                               .px       = _info.phys_area(),
+	                                               .px       = Blit::transformed(_info.phys_area(), rotate),
 	                                               .mm       = { },
-	                                               .viewport = { { }, _info.size },
-	                                               .rotate   = { },
+	                                               .viewport = { .at = { .x = 0, .y = int(Blit::transformed(_info.phys_area(), rotate).h - Blit::transformed(_info.size     , rotate).h) }, .area= Blit::transformed(_info.size     , rotate) },
+	                                               .rotate = { rotate },
 	                                               .flip     = { } } };
 	Timer::Connection _timer { _env };
 
