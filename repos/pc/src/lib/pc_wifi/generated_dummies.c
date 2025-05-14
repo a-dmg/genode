@@ -769,14 +769,6 @@ void pci_stop_and_remove_bus_device(struct pci_dev * dev)
 }
 
 
-#include <linux/pci.h>
-
-int pci_write_config_word(const struct pci_dev * dev,int where,u16 val)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/pid.h>
 
 int pidfd_prepare(struct pid * pid,unsigned int flags,struct file ** ret)

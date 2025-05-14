@@ -131,6 +131,9 @@ int pci_read_config_word(const struct pci_dev * dev,int where,u16 * val)
 		case PCI_COMMAND:
 			*val = PCI_COMMAND_MASTER | PCI_COMMAND_MEMORY | PCI_COMMAND_IO;
 			return 0;
+		case PCI_DEVICE_ID:
+			*val = 0x1103;
+			return 0;
 	/*
 	 * rtlwifi: read but ignored
 	 */
@@ -211,6 +214,7 @@ int pci_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
 {
 	if ((flags & PCI_IRQ_LEGACY) && min_vecs == 1 && dev->irq)
 		return 1;
+	return 1;
 	return -ENOSPC;
 }
 
