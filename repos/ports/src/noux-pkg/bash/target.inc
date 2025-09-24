@@ -5,7 +5,7 @@ CONFIGURE_ARGS = --without-bash-malloc
 # resolving libc-internal references to the bash binary, which causes
 # trouble for fork/execve.
 #
-CONFIGURE_ARGS += bash_cv_getenv_redef=no
+CONFIGURE_ARGS += bash_cv_getenv_redef=no CFLAGS_FOR_BUILD="-std=gnu17"
 
 CFLAGS += -Dsh_xfree=free
 
