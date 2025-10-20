@@ -24,7 +24,7 @@
 
 namespace Bootstrap {
 
-	struct Platform;
+	class Platform;
 
 	using Genode::addr_t;
 	using Genode::size_t;
