@@ -14,6 +14,8 @@
 #ifndef _SRC__INCLUDE__HW__SPEC__ARM__PSCI_H_
 #define _SRC__INCLUDE__HW__SPEC__ARM__PSCI_H_
 
+#include <base/log.h>
+
 namespace Hw { template <typename CONDUIT_FUNCTOR> class Psci; }
 
 template <typename CONDUIT_FUNCTOR>
@@ -45,10 +47,16 @@ class Hw::Psci
 
 		static bool cpu_on(unsigned long cpu_id, void *entrypoint)
 		{
-			return CONDUIT_FUNCTOR::call(_psci_func(CPU_ON, false),
+			int result = CONDUIT_FUNCTOR::call(_psci_func(CPU_ON, false),
 			                             cpu_id,
 			                             (unsigned long)entrypoint,
-			                             cpu_id) == 0;
+			                             cpu_id);
+			if (result != 0) {
+				Genode::error("Failed to boot CPU ", cpu_id, " with error ", result);
+			} else {
+				Genode::raw("CPU ", cpu_id, " booted");
+			}
+			return result == 0;
 		}
 
 		static bool cpu_off()
