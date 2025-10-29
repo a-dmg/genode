@@ -29,6 +29,7 @@
 	_start:
 
 	bl _mmu_disable
+	bl _crt0_inc_cpu_counter
 
 	/**
 	 * Hack for Qemu, which starts all cpus at once
@@ -90,6 +91,23 @@
 	str xzr, [x1], #8
 	b 1b
 
+	/**********************
+	 ** CRT0 CPU counter **
+	 **********************/
+
+	_crt0_inc_cpu_counter:
+	wfe
+	ldr x1, =_crt0_cpu_counter
+	ldr w2, [x1]
+	add w2, w2, #1
+	str w2, [x1]
+	sev
+	ret
+	.global _crt0_cpu_counter
+	_crt0_cpu_counter:
+	.long 0
+
+
 	/************************************
 	 ** Common Entrypoint for all CPUs **
 	 ************************************/
@@ -98,6 +116,7 @@
 	_crt0_start_secondary:
 
 	bl _mmu_disable
+	bl _crt0_inc_cpu_counter
 
 
 	/****************

@@ -27,7 +27,7 @@ Bootstrap::Platform::Board::Board()
 	::Board::Pic pic {};
 }
 
-
+extern unsigned int _crt0_cpu_counter;
 void Board::Cpu::wake_up_all_cpus(void *entry)
 {
 	for (unsigned cpu_id = 1; cpu_id < NR_OF_CPUS; cpu_id++) {
@@ -35,4 +35,9 @@ void Board::Cpu::wake_up_all_cpus(void *entry)
 			Genode::error("Failed to boot CPU", cpu_id);
 		}
 	}
+	Genode::raw("will wait for _crt0_cpu_counter(", _crt0_cpu_counter,") == ", NR_OF_CPUS);
+	while (_crt0_cpu_counter != NR_OF_CPUS) {
+		asm volatile("dsb #15");
+	}
+	Genode::raw("_crt0_cpu_counter=", _crt0_cpu_counter);
 }
