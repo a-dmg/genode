@@ -265,7 +265,11 @@ class Hw::Local_interrupt_controller
 
 		void send_ipi(Hw::Arm_cpu::Id cpu_id)
 		{
-			Cpu_interface::Icc_sgi1r_el1::write(1ULL << cpu_id.value);
+			using Sgi1r_el1 = Cpu_interface::Icc_sgi1r_el1;
+			Sgi1r_el1::access_t reg { 0 };
+			reg = static_cast<Sgi1r_el1::access_t>(cpu_id.aff1 << 16); /* set Aff1 */
+			reg |= 1UL << cpu_id.aff0; /* set targetList */
+			Sgi1r_el1::write(reg);
 		}
 };
 

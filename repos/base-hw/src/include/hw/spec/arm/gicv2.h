@@ -235,7 +235,7 @@ class Hw::Local_interrupt_controller : Genode::Mmio<0x14>
 			using Sgir = Distributor::Sgir;
 			Sgir::access_t sgir = 0;
 			Sgir::Sgi_int_id::set(sgir, IPI);
-			Sgir::Cpu_target_list::set(sgir, 1 << cpu_id.value);
+			Sgir::Cpu_target_list::set(sgir, 1 << cpu_id.aff0);
 			_distr.write<Sgir>(sgir);
 		}
 

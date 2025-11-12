@@ -14,6 +14,7 @@
 #ifndef _SRC__LIB__HW__SPEC__ARM_64__CPU_H_
 #define _SRC__LIB__HW__SPEC__ARM_64__CPU_H_
 
+#include <base/log.h>
 #include <hw/spec/arm/cpu.h>
 
 #define SYSTEM_REGISTER(sz, name, reg, ...) \
@@ -70,9 +71,7 @@ struct Hw::Arm_64_cpu
 		struct D_min_line : Bitfield<16, 4> {};
 	);
 
-	SYSTEM_REGISTER(64, Current_el, currentel,
-		enum Level { EL0, EL1, EL2, EL3 };
-		struct El : Bitfield<2, 2> {};
+	SYSTEM_REGISTER(64, Current_el, currentel, enum Level { EL0, EL1, EL2, EL3 }; struct El : Bitfield<2, 2> {};
 	);
 
 	struct Esr : Genode::Register<64>
@@ -277,9 +276,11 @@ struct Hw::Arm_64_cpu
 	static Id current_core_id()
 	{
 		Mpidr::access_t mpidr = Mpidr::read();
-		if (Mpidr::MT::get(mpidr))
-			return { Mpidr::Aff1::get(mpidr) };
-		return { Mpidr::Aff0::get(mpidr) };
+		return {
+			Mpidr::Aff0::get(mpidr),
+			Mpidr::Aff1::get(mpidr),
+			Mpidr::MT::get(mpidr) == 1 ? true : false
+		};
 	}
 
 	static inline void wait_for_xchg(volatile int * addr,

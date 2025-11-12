@@ -27,9 +27,7 @@ static inline void prepare_and_leave_el3()
 	Cpu::Scr::Rw::set(scr,  1); /* exec in aarch64    */
 	Cpu::Scr::Smd::set(scr, 1); /* disable smc call   */
 	Cpu::Scr::write(scr);
-
-	Cpu::Spsr::access_t pstate = 0;
-	Cpu::Spsr::Sp::set(pstate, 1); /* select non-el0 stack pointer */
+Cpu::Spsr::access_t pstate = 0; Cpu::Spsr::Sp::set(pstate, 1); /* select non-el0 stack pointer */
 	Cpu::Spsr::El::set(pstate, el2 ? Cpu::Current_el::EL2
 	                               : Cpu::Current_el::EL1);
 	Cpu::Spsr::F::set(pstate, 1);

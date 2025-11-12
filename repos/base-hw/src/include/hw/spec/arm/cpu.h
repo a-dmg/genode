@@ -14,6 +14,7 @@
 #ifndef _SRC__LIB__HW__SPEC__ARM__CPU_H_
 #define _SRC__LIB__HW__SPEC__ARM__CPU_H_
 
+#include <base/log.h>
 #include <hw/id.h>
 #include <hw/spec/arm/register_macros.h>
 
@@ -26,11 +27,49 @@ struct Hw::Suspend_type { };
 struct Hw::Arm_cpu
 {
 	/**
-	 * We use the Mpidr::Aff_0 as CPU identifier,
-	 * which has size of one byte
+	 * Cpu::Id use a 8 bits value in the kernel,
+	 * support translation for two level of affinity from mpidr.
 	 */
-	using Id = Hw::Id<Genode::uint8_t>;
+	struct Id: Hw::Id<Genode::uint8_t>
+	{
+		const Genode::uint8_t  aff0;
+		const Genode::uint8_t  aff1;
+		const bool             multi_processor;
 
+		void print(Genode::Output &ouput) const
+		{
+			using namespace Genode;
+			using Genode::print;
+
+			print(ouput, " CPU id=", value, " aff0=", aff0, " aff1=", aff1);
+		}
+
+		static constexpr Genode::uint8_t NR_OF_THREAD_PER_CORE = 1; /* put that here for now */ 
+
+		static inline Genode::uint8_t affx_to_kernel_cpu_id(Genode::uint8_t aff0, Genode::uint8_t aff1, bool mp)
+		{
+			if (mp) {
+				return aff1 * NR_OF_THREAD_PER_CORE + aff0;
+			} else {
+				return aff0;
+			}
+		}
+
+		/* default ctor used for legacy Id based only on Aff0 */
+		Id(Genode::uint8_t aff0)
+		: Hw::Id<Genode::uint8_t> { affx_to_kernel_cpu_id(aff0, 0x0, false) },
+		  aff0 { aff0 },
+		  aff1 { 0x0 },
+		  multi_processor { false }
+		{}
+
+		Id(Genode::uint8_t aff0, Genode::uint8_t aff1, bool multi_processor)
+		: Hw::Id<Genode::uint8_t> { affx_to_kernel_cpu_id(aff0, aff1, multi_processor) },
+		  aff0 { aff0 },
+		  aff1 { aff1 },
+		  multi_processor { multi_processor }
+		{}
+	};
 
 	/***************************************
 	 ** System Coprocessor 15 Definitions **

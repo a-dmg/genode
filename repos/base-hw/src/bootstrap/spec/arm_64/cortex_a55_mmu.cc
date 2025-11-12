@@ -61,7 +61,7 @@ static inline void prepare_and_leave_el3()
 
 
 static inline void prepare_and_leave_el2(Cpu::Ttbr::access_t const ttbr,
-                                         unsigned cpu_id)
+                                         Bootstrap::Platform::Cpu_id cpu_id)
 {
 	using namespace Hw::Mm;
 
@@ -83,7 +83,7 @@ static inline void prepare_and_leave_el2(Cpu::Ttbr::access_t const ttbr,
 	/* set hypervisor exception vector */
 	Cpu::Vbar_el2::write(el2_addr(hypervisor_exception_vector().base));
 	Genode::addr_t const stack_el2 = el2_addr(hypervisor_stack().base +
-	                                          (cpu_id+1) * 0x1000);
+	                                          (cpu_id.value+1) * 0x1000);
 
 	/* set hypervisor's translation table */
 	Cpu::Ttbr0_el2::write(ttbr);
@@ -138,10 +138,12 @@ static inline void prepare_and_leave_el2(Cpu::Ttbr::access_t const ttbr,
 }
 
 
-unsigned Bootstrap::Platform::enable_mmu()
+Bootstrap::Platform::Cpu_id Bootstrap::Platform::enable_mmu()
 {
-	unsigned const cpu_id  { Cpu::current_core_id() };
+	Cpu::Id  const cpu_id  { Cpu::current_core_id() };
 	bool     const primary { cpu_id == 0 };
+
+	static ::Board::Global_interrupt_controller gic {};
 
 	Cpu::Ttbr::access_t ttbr =
 		Cpu::Ttbr::Baddr::masked((Genode::addr_t)core_pd->table_base);
@@ -155,7 +157,6 @@ unsigned Bootstrap::Platform::enable_mmu()
 	case Cpu::Current_el::EL3:
 		{
 			prepare_and_leave_el3();
-			::Board::Pic pic __attribute__((unused)) {};
 		}
 		[[fallthrough]];
 	case Cpu::Current_el::EL2:
@@ -167,6 +168,9 @@ unsigned Bootstrap::Platform::enable_mmu()
 		Genode::error("cannot enable MMU in EL0");
 		return cpu_id;
 	}
+
+	/* initialize cpu-local interrupt controller appropriatedly */
+	::Board::Local_interrupt_controller ic __attribute__((unused)) { gic };
 
 	/* enable performance counter for user-land */
 	Cpu::Pmuserenr_el0::write(0b1111);

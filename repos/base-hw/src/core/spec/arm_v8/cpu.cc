@@ -13,9 +13,7 @@
 
 /* base includes */
 #include <util/bit_allocator.h>
-#include <cpu/memory_barrier.h>
-
-/* base-hw core includes */
+#include <cpu/memory_barrier.h> /* base-hw core includes */
 #include <board.h>
 #include <kernel/thread.h>
 
