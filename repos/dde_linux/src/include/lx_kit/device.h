@@ -29,10 +29,15 @@ namespace Lx_kit {
 
 	class Device;
 	class Device_list;
+
+	using Name = String<64>;
 }
 
 struct clk {
-	unsigned long rate;
+	Lx_kit::Name   device_name;
+	Lx_kit::Name   name;
+	int            idx;
+	unsigned long  rate;
 };
 
 class Lx_kit::Device : List<Device>::Element
@@ -105,8 +110,9 @@ class Lx_kit::Device : List<Device>::Element
 			Name const name;
 			clk        lx_clock;
 
-			Clock(unsigned idx, Name const name)
-			: idx(idx), name(name), lx_clock{0} {}
+			Clock(unsigned idx, Name const name, Name const device_name)
+			: idx(idx), name(name), lx_clock{ .device_name=device_name, .name=name, .idx=static_cast<int>(idx), .rate=0UL }
+			{}
 		};
 
 		struct Pci_config
@@ -174,6 +180,7 @@ class Lx_kit::Device : List<Device>::Element
 		void   enable();
 		clk *  clock(const char * name);
 		clk *  clock(unsigned idx);
+		int    clock_set_rate(int idx, unsigned long rate);
 		bool   io_mem(addr_t phys_addr, size_t size);
 		void * io_mem_local_addr(addr_t phys_addr, size_t size);
 		bool   irq_unmask(unsigned irq);

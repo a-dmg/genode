@@ -137,6 +137,12 @@ clk * Device::clock(const char * name)
 }
 
 
+int Device::clock_set_rate(int idx, unsigned long rate)
+{
+	return _pdev->clock_set_rate(idx, rate);
+}
+
+
 clk * Device::clock(unsigned idx)
 {
 	clk * ret = nullptr;
@@ -397,7 +403,7 @@ Device::Device(Entrypoint           &ep,
 	i = 0;
 	node.for_each_sub_node("clock", [&] (Node const &node) {
 		Device::Name name = node.attribute_value("name", Device::Name());
-		_clocks.insert(new (heap) Device::Clock(i++, name));
+		_clocks.insert(new (heap) Device::Clock(i++, name, _name));
 	});
 
 	node.for_each_sub_node("pci-config",  [&] (Node const &node) {

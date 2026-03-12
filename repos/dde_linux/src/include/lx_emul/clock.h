@@ -26,6 +26,8 @@ struct clk * lx_emul_clock_get(const struct device_node * node,
 
 unsigned long lx_emul_clock_get_rate(struct clk * clk);
 
+int lx_emul_clock_set_rate(struct clk * clk, unsigned long);
+
 #ifdef __cplusplus
 }
 #endif

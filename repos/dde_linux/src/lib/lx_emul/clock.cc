@@ -12,8 +12,9 @@
  */
 
 #include <base/log.h>
-#include <lx_kit/env.h>
+#include <linux/errno.h>
 #include <lx_emul/clock.h>
+#include <lx_kit/env.h>
 
 /*
  * CONFIG_OF is normally disabled on PC thus of_device_is_compatible() should
@@ -55,4 +56,27 @@ unsigned long lx_emul_clock_get_rate(struct clk * clk)
 		return 0;
 
 	return clk->rate;
+}
+
+int lx_emul_clock_set_rate(struct clk * clk, unsigned long rate)
+{
+	using namespace Lx_kit;
+
+	if (!clk) {
+		Genode::error("driver called ", __FUNCTION__, " with a null clk ptr!");
+		return -EINVAL;
+	}
+
+	int ret = -ENODEV;
+
+	env().devices.for_each([&] (Device &d) {
+		if (d.name() != clk->device_name) return;
+		ret = d.clock_set_rate(clk->idx, rate);
+	});
+
+	if (ret < 0) {
+		Genode::error("could not set clock '", clk->name, "' rate to '", rate, "' on device '", clk->device_name, "' (error: ", ret, ")!");
+	}
+
+	return ret;
 }
