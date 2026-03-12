@@ -40,13 +40,14 @@ struct Platform::Device_interface : Interface
 	 */
 	struct Range { addr_t start; size_t size; };
 
+	GENODE_RPC(Rpc_clock_set_rate, int, clock_set_rate, int, unsigned long);
 	GENODE_RPC(Rpc_irq, Irq_session_capability, irq, unsigned);
 	GENODE_RPC(Rpc_io_mem, Io_mem_session_capability, io_mem,
 	           unsigned, Range &);
 	GENODE_RPC(Rpc_io_port_range, Io_port_session_capability, io_port_range,
 	           unsigned);
 
-	GENODE_RPC_INTERFACE(Rpc_irq, Rpc_io_mem, Rpc_io_port_range);
+	GENODE_RPC_INTERFACE(Rpc_clock_set_rate, Rpc_irq, Rpc_io_mem, Rpc_io_port_range);
 };
 
 

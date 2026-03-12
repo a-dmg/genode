@@ -243,6 +243,29 @@ Genode::Io_port_session_capability Device_component::io_port_range(unsigned idx)
 }
 
 
+int Device_component::clock_set_rate(int idx, unsigned long rate)
+{
+	if (rate == 0 || idx < 0) {
+		return -22; /* return EINVAL for linux based drivers */
+	}
+
+	int ret = -19; /* return ENODEV for linux based drivers */
+	_clock_registry.for_each([&] (Clock &clock) {
+		if (clock.idx == static_cast<unsigned>(idx)) {
+			_device_model.clocks().apply(clock.name, [&] (Driver::Clock &clk) {
+				clk.rate(Driver::Clock::Rate { rate });
+				ret = 0;
+			});
+		}
+	});
+
+	if (ret < 0) {
+		Genode::error(_device, " has no such clock ", idx, " index!");
+	}
+	return ret;
+}
+
+
 template <typename SESSION>
 void Device_component::_with_reserved_quota_for_session(Driver::Session_component &session,
                                       auto const &fn)
@@ -295,6 +318,12 @@ Device_component::Device_component(Registry<Device_component> &registry,
 	 */
 
 	try {
+		device.for_each_clock([&] (unsigned idx,
+		                           Device::Clock::Name const &name)
+		{
+			new (session.heap()) Clock(_clock_registry, name, idx);
+		});
+
 		device.for_each_irq([&] (unsigned              idx,
 		                         unsigned              nr,
 		                         Irq_session::Type     type,

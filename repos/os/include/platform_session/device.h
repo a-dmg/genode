@@ -70,6 +70,11 @@ class Platform::Device : Interface, Noncopyable
 
 		struct Type { String<64> name; };
 
+		int clock_set_rate(int idx, unsigned long rate)
+		{
+			return _cap.call<Device_interface::Rpc_clock_set_rate>(idx, rate);
+		}
+
 		Device(Connection &platform, Type type)
 		:
 			_platform(platform), _cap(platform.device_by_type(type.name.string()))

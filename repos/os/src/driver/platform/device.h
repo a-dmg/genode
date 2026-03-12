@@ -355,6 +355,14 @@ class Driver::Device : private List_model<Device>::Element
 		virtual void acquire(Device_owner &);
 		virtual void release(Device_owner &);
 
+		void for_each_clock(auto const &fn) const
+		{
+			unsigned idx = 0;
+			_clock_list.for_each([&] (Clock const &clock) {
+				fn(idx++, clock.name);
+			});
+		}
+
 		void for_each_irq(auto const &fn) const
 		{
 			unsigned idx = 0;

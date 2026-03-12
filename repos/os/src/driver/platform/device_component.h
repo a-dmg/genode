@@ -107,6 +107,18 @@ class Driver::Device_component : public Rpc_object<Platform::Device_interface,
 				name(name) {}
 		};
 
+		struct Clock: Registry<Clock>::Element
+		{
+			unsigned            idx;
+			Device::Clock::Name name;
+
+			Clock(Registry<Clock> &registry, Device::Clock::Name const &name, unsigned idx)
+			: Registry<Clock>::Element(registry, *this),
+			  idx { idx },
+			  name { name }
+			{}
+		};
+
 		struct Pci_config
 		{
 			addr_t   addr;
@@ -134,6 +146,7 @@ class Driver::Device_component : public Rpc_object<Platform::Device_interface,
 		Irq_session_capability     irq(unsigned);
 		Io_mem_session_capability  io_mem(unsigned, Range &);
 		Io_port_session_capability io_port_range(unsigned);
+		int                        clock_set_rate(int idx, unsigned long rate);
 
 	private:
 
@@ -149,6 +162,7 @@ class Driver::Device_component : public Rpc_object<Platform::Device_interface,
 		Registry<Io_port_range>             _io_port_range_registry {};
 		Registry<Io_mem>                    _reserved_mem_registry {};
 		Registry<Io_mmu>                    _io_mmu_registry {};
+		Registry<Clock>                     _clock_registry {};
 		Constructible<Pci_config>           _pci_config {};
 
 		void _release_resources();
